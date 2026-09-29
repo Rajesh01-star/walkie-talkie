@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Radio, Hash, Copy, Check } from 'lucide-react';
+import { Copy, Check, Plus, X } from 'lucide-react';
 import { soundFx } from '../lib/soundFx';
 
 export interface ChannelPreset {
@@ -9,10 +9,10 @@ export interface ChannelPreset {
 }
 
 export const PRESET_CHANNELS: ChannelPreset[] = [
-  { id: '32-48', name: 'ALPHA', freq: '32.48' },
-  { id: '44-10', name: 'BRAVO', freq: '44.10' },
-  { id: '88-50', name: 'CHARLIE', freq: '88.50' },
-  { id: '107-90', name: 'DELTA', freq: '107.90' },
+  { id: '32-48', name: 'Ch 1', freq: '32.48' },
+  { id: '44-10', name: 'Ch 2', freq: '44.10' },
+  { id: '88-50', name: 'Ch 3', freq: '88.50' },
+  { id: '107-90', name: 'Ch 4', freq: '107.90' },
 ];
 
 interface ChannelBarProps {
@@ -33,7 +33,6 @@ export const ChannelBar: React.FC<ChannelBarProps> = ({
   const handleSelect = (id: string, freq: string) => {
     if (id === currentChannel) return;
     soundFx.playTuneClick();
-    soundFx.playStaticBurst(0.06, 0.02, 0.04);
     onSelectChannel(id, freq);
   };
 
@@ -56,76 +55,84 @@ export const ChannelBar: React.FC<ChannelBarProps> = ({
     });
   };
 
+  const isCustomChannel = !PRESET_CHANNELS.some((p) => p.id === currentChannel);
+
   return (
-    <div className="w-full max-w-md flex flex-col gap-3">
-      {/* Preset Chips */}
-      <div className="grid grid-cols-4 gap-2">
+    <div className="w-full max-w-sm flex flex-col items-center gap-2.5">
+      {/* Clean Segmented Channel Switcher */}
+      <div className="flex items-center p-1 bg-zinc-900/90 border border-zinc-800 rounded-full shadow-inner">
         {PRESET_CHANNELS.map((ch) => {
           const isActive = currentChannel === ch.id;
           return (
             <button
               key={ch.id}
               onClick={() => handleSelect(ch.id, ch.freq)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl border text-xs font-mono transition-all duration-200 active:scale-95 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-150 ${
                 isActive
-                  ? 'bg-cyan-500/15 border-cyan-400 text-cyan-300 shadow-[0_0_12px_rgba(0,240,255,0.25)] font-bold'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                  ? 'bg-zinc-100 text-zinc-950 font-semibold shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
-              <span className="text-[10px] tracking-wider opacity-70">{ch.name}</span>
-              <span className="text-xs font-semibold">{ch.freq}</span>
+              {ch.freq}
             </button>
           );
         })}
-      </div>
 
-      {/* Custom & Share Row */}
-      <div className="flex items-center justify-between gap-2 px-1">
+        {isCustomChannel && (
+          <span className="px-3 py-1 bg-sky-500/20 text-sky-300 text-xs font-medium rounded-full border border-sky-400/30">
+            {currentFreq}
+          </span>
+        )}
+
         <button
           onClick={() => setShowCustomModal(!showCustomModal)}
-          className="text-xs font-mono text-zinc-400 hover:text-cyan-400 flex items-center gap-1.5 transition-colors"
+          className={`p-1.5 ml-1 rounded-full text-xs transition-colors ${
+            showCustomModal ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'
+          }`}
+          title="Custom Channel"
         >
-          <Hash className="w-3.5 h-3.5" />
-          <span>{showCustomModal ? 'Close Custom' : 'Custom Channel / Room'}</span>
-        </button>
-
-        <button
-          onClick={handleCopyLink}
-          className="text-xs font-mono text-zinc-400 hover:text-cyan-400 flex items-center gap-1.5 transition-colors"
-        >
-          {copied ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-400 font-medium">Link Copied!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span>Share Channel Link</span>
-            </>
-          )}
+          {showCustomModal ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
         </button>
       </div>
 
-      {/* Custom Channel Input Drawer */}
+      {/* Custom Channel Modal Drawer */}
       {showCustomModal && (
-        <form onSubmit={handleCustomSubmit} className="flex gap-2 p-2 bg-zinc-900/80 rounded-xl border border-zinc-800">
+        <form onSubmit={handleCustomSubmit} className="flex gap-2 w-full max-w-xs p-1 bg-zinc-900 border border-zinc-800 rounded-xl">
           <input
             type="text"
-            placeholder="Room code (e.g. squad-99)"
+            placeholder="Custom room code..."
             value={customInput}
             onChange={(e) => setCustomInput(e.target.value)}
-            className="flex-1 bg-black/60 border border-zinc-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-400 font-mono"
+            className="flex-1 bg-transparent px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none"
             maxLength={20}
+            autoFocus
           />
           <button
             type="submit"
-            className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs rounded-lg transition-colors font-mono"
+            className="px-3 py-1 bg-zinc-200 hover:bg-white text-zinc-900 font-semibold text-xs rounded-lg transition-colors"
           >
-            Tune
+            Join
           </button>
         </form>
       )}
+
+      {/* Share Channel Pill */}
+      <button
+        onClick={handleCopyLink}
+        className="text-[11px] text-zinc-500 hover:text-zinc-300 flex items-center gap-1.5 transition-colors"
+      >
+        {copied ? (
+          <>
+            <Check className="w-3 h-3 text-emerald-400" />
+            <span className="text-emerald-400">Invite link copied</span>
+          </>
+        ) : (
+          <>
+            <Copy className="w-3 h-3" />
+            <span>Copy invite link</span>
+          </>
+        )}
+      </button>
     </div>
   );
 };

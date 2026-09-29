@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Volume2, VolumeX, Lock, Unlock, Wifi, WifiOff, Users, AlertCircle } from 'lucide-react';
 import { soundFx } from '../lib/soundFx';
 import { AudioVisualizer } from './AudioVisualizer';
@@ -416,19 +415,12 @@ export const WalkieTalkieDevice: React.FC<WalkieTalkieDeviceProps> = ({
         </div>
 
         {/* Error Notification Banner */}
-        <AnimatePresence>
-          {errorMsg && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="bg-red-950/80 border border-red-500/50 rounded-xl p-3 text-red-200 text-xs flex items-start gap-2"
-            >
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {errorMsg && (
+          <div className="bg-red-950/80 border border-red-500/50 rounded-xl p-3 text-red-200 text-xs flex items-start gap-2 transition-all duration-200 animate-fadeIn">
+            <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
 
         {/* Speaker Mesh Grille Pattern */}
         <div className="grid grid-cols-8 gap-2 py-1 px-4 opacity-40">
